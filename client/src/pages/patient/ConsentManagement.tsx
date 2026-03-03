@@ -8,6 +8,7 @@ import { Shield, ShieldOff, Search } from 'lucide-react';
 import { useTransaction } from '../../hooks/useTransaction';
 import { useContract } from '../../hooks/useContract';
 import { useContractStore } from '../../stores/contractStore';
+import { useAuthStore } from '../../stores/authStore';
 
 export default function ConsentManagement() {
   const [doctorAddress, setDoctorAddress] = useState('');
@@ -17,8 +18,7 @@ export default function ConsentManagement() {
   const { executeTransaction } = useTransaction();
   const contract = useContract();
   const { isTransactionPending } = useContractStore();
-  const { address } = useAuthStore(); // imported below
-  import { useAuthStore } from '../../stores/authStore';
+  const { address } = useAuthStore();
 
   const handleGrant = async () => {
     if (!doctorAddress) return;

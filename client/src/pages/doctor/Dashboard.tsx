@@ -2,6 +2,7 @@ import { ProtectedRoute } from '../../components/layout/ProtectedRoute';
 import { AppLayout } from '../../components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Users, FileText, CheckCircle2 } from 'lucide-react';
+import { Button } from '../../components/ui/button';
 
 export default function DoctorDashboard() {
   return (
@@ -74,6 +75,3 @@ export default function DoctorDashboard() {
     </ProtectedRoute>
   );
 }
-
-// Needed local Button import for mockup UI
-import { Button } from '../../components/ui/button';
