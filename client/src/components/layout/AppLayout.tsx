@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useAuthStore } from '../../stores/authStore';
 import { useWallet } from '../../hooks/useWallet';
-import { Shield, Activity, Users, Settings, LogOut, FileText } from 'lucide-react';
+import { Shield, Activity, Users, Settings, LogOut, FileText, ShieldAlert, AlertCircle, Database } from 'lucide-react';
 import { Button } from '../ui/button';
 
 export const AppLayout = ({ children }: { children: ReactNode }) => {
@@ -31,9 +31,15 @@ export const AppLayout = ({ children }: { children: ReactNode }) => {
           { href: '/admin/roles', label: 'Role Assignment', icon: Users },
           { href: '/admin/audit', label: 'Audit Log', icon: FileText },
           { href: '/admin/compliance', label: 'Compliance', icon: Shield },
+          { href: '/admin/suspicious', label: 'Suspicious Activity', icon: ShieldAlert },
         ];
       default:
-        return [];
+        return [
+          { href: '/system/contract', label: 'Contract Status', icon: Database },
+          { href: '/system/transactions', label: 'Transactions', icon: Activity },
+          { href: '/system/profile', label: 'Profile', icon: Settings },
+          { href: '/system/grievance', label: 'Grievance', icon: AlertCircle },
+        ];
     }
   };
 
@@ -48,7 +54,7 @@ export const AppLayout = ({ children }: { children: ReactNode }) => {
           <span className="font-heading font-bold text-lg">MediChain</span>
         </div>
         
-        <nav className="flex-1 p-4 space-y-1">
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {navLinks.map((link) => {
             const Icon = link.icon;
             const isActive = location === link.href;
@@ -65,13 +71,42 @@ export const AppLayout = ({ children }: { children: ReactNode }) => {
               </Link>
             );
           })}
+
+          {role && (
+            <>
+              <div className="pt-4 pb-2 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                System
+              </div>
+              {[
+                { href: '/system/contract', label: 'Contract Status', icon: Database },
+                { href: '/system/transactions', label: 'Transactions', icon: Activity },
+                { href: '/system/profile', label: 'Profile Settings', icon: Settings },
+                { href: '/system/grievance', label: 'Grievance', icon: AlertCircle },
+              ].map((link) => {
+                const Icon = link.icon;
+                const isActive = location === link.href;
+                return (
+                  <Link key={link.href} href={link.href}>
+                    <a className={`flex items-center px-4 py-3 rounded-md text-sm font-medium transition-colors ${
+                      isActive 
+                        ? 'bg-primary/10 text-primary' 
+                        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                    }`}>
+                      <Icon className="h-5 w-5 mr-3" />
+                      {link.label}
+                    </a>
+                  </Link>
+                );
+              })}
+            </>
+          )}
         </nav>
 
         <div className="p-4 border-t space-y-4">
           <div className="text-xs text-muted-foreground break-all px-2">
             Connected: {address?.slice(0, 6)}...{address?.slice(-4)}
           </div>
-          <Button variant="outline" className="w-full justify-start" onClick={disconnect}>
+          <Button variant="outline" className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10" onClick={disconnect}>
             <LogOut className="h-4 w-4 mr-2" />
             Disconnect
           </Button>
