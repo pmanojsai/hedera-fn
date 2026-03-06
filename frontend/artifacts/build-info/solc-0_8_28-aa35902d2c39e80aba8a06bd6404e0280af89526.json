@@ -1,0 +1,59 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_28-aa35902d2c39e80aba8a06bd6404e0280af89526",
+  "solcVersion": "0.8.28",
+  "solcLongVersion": "0.8.28+commit.7893614a",
+  "userSourceNameMap": {
+    "contracts/AccessControl.sol": "project/contracts/AccessControl.sol",
+    "contracts/AuditLog.sol": "project/contracts/AuditLog.sol",
+    "contracts/ConsentManager.sol": "project/contracts/ConsentManager.sol",
+    "contracts/DataAccessManager.sol": "project/contracts/DataAccessManager.sol",
+    "contracts/DataFiduciaryRegistry.sol": "project/contracts/DataFiduciaryRegistry.sol",
+    "contracts/Lock.sol": "project/contracts/Lock.sol",
+    "contracts/VolunteerRegistry.sol": "project/contracts/VolunteerRegistry.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "cancun",
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers",
+            "metadata"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "project/contracts/AccessControl.sol": {
+        "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.28;\n\ncontract AccessControl {\n    address public superAdmin;\n    mapping(address => bool) public admins;\n\n    constructor() {\n        superAdmin = msg.sender;\n        admins[msg.sender] = true;\n    }\n\n    modifier onlyAdmin() {\n        require(admins[msg.sender], \"Not admin\");\n        _;\n    }\n\n    function addAdmin(address _admin) external onlyAdmin {\n        admins[_admin] = true;\n    }\n\n    function removeAdmin(address _admin) external onlyAdmin {\n        admins[_admin] = false;\n    }\n}"
+      },
+      "project/contracts/AuditLog.sol": {
+        "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.28;\n\ncontract AuditLog {\n\n    event ConsentGranted(\n        address indexed dataPrincipal,\n        address indexed fiduciary,\n        string purpose,\n        uint256 expiry\n    );\n\n    event ConsentRevoked(\n        address indexed dataPrincipal,\n        address indexed fiduciary\n    );\n\n    event DataAccessed(\n        address indexed dataPrincipal,\n        address indexed fiduciary,\n        string purpose,\n        uint256 timestamp\n    );\n\n    event ErasureRequested(\n        address indexed dataPrincipal,\n        uint256 timestamp\n    );\n\n    function logConsentGranted(\n        address _principal,\n        address _fiduciary,\n        string memory _purpose,\n        uint256 _expiry\n    ) external {\n        emit ConsentGranted(_principal, _fiduciary, _purpose, _expiry);\n    }\n\n    function logConsentRevoked(\n        address _principal,\n        address _fiduciary\n    ) external {\n        emit ConsentRevoked(_principal, _fiduciary);\n    }\n\n    function logDataAccessed(\n        address _principal,\n        address _fiduciary,\n        string memory _purpose,\n        uint256 _timestamp\n    ) external {\n        emit DataAccessed(_principal, _fiduciary, _purpose, _timestamp);\n    }\n\n    function logErasureRequested(\n        address _principal,\n        uint256 _timestamp\n    ) external {\n        emit ErasureRequested(_principal, _timestamp);\n    }\n}"
+      },
+      "project/contracts/ConsentManager.sol": {
+        "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.28;\n\nimport \"./DataFiduciaryRegistry.sol\";\nimport \"./AuditLog.sol\";\n\ncontract ConsentManager {\n\n    struct Consent {\n        address dataPrincipal;\n        address dataFiduciary;\n        string purpose;\n        string dataHash;\n        uint256 grantedAt;\n        uint256 expiry;\n        bool isActive;\n        bool erased;\n    }\n\n    mapping(address => Consent[]) private consents;\n\n    DataFiduciaryRegistry public registry;\n    AuditLog public audit;\n\n    constructor(address _registry, address _audit) {\n        registry = DataFiduciaryRegistry(_registry);\n        audit = AuditLog(_audit);\n    }\n\n    function grantConsent(\n        address _fiduciary,\n        string memory _purpose,\n        string memory _dataHash,\n        uint256 _durationInSeconds\n    ) external {\n\n        require(registry.isApproved(_fiduciary), \"Fiduciary not approved\");\n\n        uint256 expiryTime = block.timestamp + _durationInSeconds;\n\n        consents[msg.sender].push(\n            Consent(\n                msg.sender,\n                _fiduciary,\n                _purpose,\n                _dataHash,\n                block.timestamp,\n                expiryTime,\n                true,\n                false\n            )\n        );\n\n        audit.logConsentGranted(msg.sender, _fiduciary, _purpose, expiryTime);\n    }\n\n    function revokeConsent(uint256 index) external {\n        Consent storage consent = consents[msg.sender][index];\n        require(consent.isActive, \"Already revoked\");\n\n        consent.isActive = false;\n\n        audit.logConsentRevoked(msg.sender, consent.dataFiduciary);\n    }\n\n    function requestErasure(uint256 index) external {\n        Consent storage consent = consents[msg.sender][index];\n        consent.erased = true;\n\n        audit.logErasureRequested(msg.sender, block.timestamp);\n    }\n\n    function getMyConsents() external view returns (Consent[] memory) {\n        return consents[msg.sender];\n    }\n\n    function validateConsent(\n        address _principal,\n        uint256 index\n    ) external view returns (bool) {\n        Consent memory consent = consents[_principal][index];\n\n        if (\n            consent.isActive &&\n            !consent.erased &&\n            block.timestamp <= consent.expiry\n        ) {\n            return true;\n        }\n\n        return false;\n    }\n}"
+      },
+      "project/contracts/DataAccessManager.sol": {
+        "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.28;\n\nimport \"./ConsentManager.sol\";\nimport \"./AuditLog.sol\";\n\ncontract DataAccessManager {\n\n    ConsentManager public consentManager;\n    AuditLog public audit;\n\n    constructor(address _consentManager, address _audit) {\n        consentManager = ConsentManager(_consentManager);\n        audit = AuditLog(_audit);\n    }\n\n    function accessData(\n        address _principal,\n        uint256 index,\n        string memory purpose\n    ) external {\n\n        bool valid = consentManager.validateConsent(_principal, index);\n        require(valid, \"Invalid or expired consent\");\n\n        audit.logDataAccessed(_principal, msg.sender, purpose, block.timestamp);\n    }\n}"
+      },
+      "project/contracts/DataFiduciaryRegistry.sol": {
+        "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.28;\n\nimport \"./AccessControl.sol\";\n\ncontract DataFiduciaryRegistry is AccessControl {\n\n    struct Fiduciary {\n        string name;\n        string licenseId;\n        bool approved;\n        bool suspended;\n    }\n\n    mapping(address => Fiduciary) public fiduciaries;\n\n    event FiduciaryRegistered(address indexed fiduciary);\n    event FiduciaryApproved(address indexed fiduciary);\n    event FiduciarySuspended(address indexed fiduciary);\n\n    function registerFiduciary(string memory _name, string memory _licenseId) external {\n        fiduciaries[msg.sender] = Fiduciary(_name, _licenseId, false, false);\n        emit FiduciaryRegistered(msg.sender);\n    }\n\n    function approveFiduciary(address _fiduciary) external onlyAdmin {\n        fiduciaries[_fiduciary].approved = true;\n        emit FiduciaryApproved(_fiduciary);\n    }\n\n    function suspendFiduciary(address _fiduciary) external onlyAdmin {\n        fiduciaries[_fiduciary].suspended = true;\n        emit FiduciarySuspended(_fiduciary);\n    }\n\n    function isApproved(address _fiduciary) public view returns (bool) {\n        return fiduciaries[_fiduciary].approved && !fiduciaries[_fiduciary].suspended;\n    }\n}"
+      },
+      "project/contracts/Lock.sol": {
+        "content": "// SPDX-License-Identifier: UNLICENSED\npragma solidity ^0.8.28;\n\n// Uncomment this line to use console.log\n// import \"hardhat/console.sol\";\n\ncontract Lock {\n  uint public unlockTime;\n  address payable public owner;\n\n  event Withdrawal(uint amount, uint when);\n\n  constructor(uint _unlockTime) payable {\n    require(\n      block.timestamp < _unlockTime,\n      \"Unlock time should be in the future\"\n    );\n\n    unlockTime = _unlockTime;\n    owner = payable(msg.sender);\n  }\n\n  function withdraw() public {\n    // Uncomment this line, and the import of \"hardhat/console.sol\", to print a log in your terminal\n    // console.log(\"Unlock time is %o and block timestamp is %o\", unlockTime, block.timestamp);\n\n    require(block.timestamp >= unlockTime, \"You can't withdraw yet\");\n    require(msg.sender == owner, \"You aren't the owner\");\n\n    emit Withdrawal(address(this).balance, block.timestamp);\n\n    owner.transfer(address(this).balance);\n  }\n}\n"
+      },
+      "project/contracts/VolunteerRegistry.sol": {
+        "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.20;\n\ncontract VolunteerRegistry {\n\n    struct Volunteer {\n        string cid;\n        bool active;\n    }\n\n    mapping(bytes32 => Volunteer) public volunteers;\n\n    event VolunteerAdded(bytes32 hashId,string cid);\n    event StatusUpdated(bytes32 hashId,bool active);\n\n    function addVolunteer(\n        bytes32 hashId,\n        string memory cid\n    ) external {\n\n        volunteers[hashId] = Volunteer(\n            cid,\n            true\n        );\n\n        emit VolunteerAdded(hashId,cid);\n    }\n\n    function updateStatus(\n        bytes32 hashId,\n        bool active\n    ) external {\n\n        volunteers[hashId].active = active;\n\n        emit StatusUpdated(hashId,active);\n    }\n\n    function getVolunteer(\n        bytes32 hashId\n    ) external view returns(\n        string memory cid,\n        bool active\n    ){\n        Volunteer memory v = volunteers[hashId];\n        return (v.cid,v.active);\n    }\n}"
+      }
+    }
+  }
+}

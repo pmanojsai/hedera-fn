@@ -1,0 +1,58 @@
+[plugin:vite:react-babel] /home/runner/workspace/client/src/pages/patient/ConsentManagement.tsx: 'import' and 'export' may only appear at the top level. (21:2)
+  24 |     if (!doctorAddress) return;
+/home/runner/workspace/client/src/pages/patient/ConsentManagement.tsx:21:2
+19 |    const { isTransactionPending } = useContractStore();
+20 |    const { address } = useAuthStore(); // imported below
+21 |    import { useAuthStore } from '../../stores/authStore';
+   |    ^
+22 |  
+23 |    const handleGrant = async () => {
+    at constructor (/home/runner/workspace/node_modules/@babel/parser/lib/index.js:365:19)
+    at TypeScriptParserMixin.raise (/home/runner/workspace/node_modules/@babel/parser/lib/index.js:6599:19)
+    at TypeScriptParserMixin.parseStatementContent (/home/runner/workspace/node_modules/@babel/parser/lib/index.js:12861:18)
+    at TypeScriptParserMixin.parseStatementContent (/home/runner/workspace/node_modules/@babel/parser/lib/index.js:9508:18)
+    at TypeScriptParserMixin.parseStatementLike (/home/runner/workspace/node_modules/@babel/parser/lib/index.js:12757:17)
+    at TypeScriptParserMixin.parseStatementListItem (/home/runner/workspace/node_modules/@babel/parser/lib/index.js:12737:17)
+    at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/home/runner/workspace/node_modules/@babel/parser/lib/index.js:13306:61)
+    at TypeScriptParserMixin.parseBlockBody (/home/runner/workspace/node_modules/@babel/parser/lib/index.js:13299:10)
+    at TypeScriptParserMixin.parseBlock (/home/runner/workspace/node_modules/@babel/parser/lib/index.js:13287:10)
+    at TypeScriptParserMixin.parseFunctionBody (/home/runner/workspace/node_modules/@babel/parser/lib/index.js:12090:24)
+    at TypeScriptParserMixin.parseFunctionBodyAndFinish (/home/runner/workspace/node_modules/@babel/parser/lib/index.js:12076:10)
+    at TypeScriptParserMixin.parseFunctionBodyAndFinish (/home/runner/workspace/node_modules/@babel/parser/lib/index.js:9172:18)
+    at /home/runner/workspace/node_modules/@babel/parser/lib/index.js:13435:12
+    at TypeScriptParserMixin.withSmartMixTopicForbiddingContext (/home/runner/workspace/node_modules/@babel/parser/lib/index.js:12393:14)
+    at TypeScriptParserMixin.parseFunction (/home/runner/workspace/node_modules/@babel/parser/lib/index.js:13434:10)
+    at TypeScriptParserMixin.parseExportDefaultExpression (/home/runner/workspace/node_modules/@babel/parser/lib/index.js:13897:19)
+    at TypeScriptParserMixin.parseExportDefaultExpression (/home/runner/workspace/node_modules/@babel/parser/lib/index.js:9402:18)
+    at TypeScriptParserMixin.parseExport (/home/runner/workspace/node_modules/@babel/parser/lib/index.js:13818:25)
+    at TypeScriptParserMixin.parseExport (/home/runner/workspace/node_modules/@babel/parser/lib/index.js:9385:20)
+    at TypeScriptParserMixin.parseStatementContent (/home/runner/workspace/node_modules/@babel/parser/lib/index.js:12868:27)
+    at TypeScriptParserMixin.parseStatementContent (/home/runner/workspace/node_modules/@babel/parser/lib/index.js:9508:18)
+    at TypeScriptParserMixin.parseStatementLike (/home/runner/workspace/node_modules/@babel/parser/lib/index.js:12757:17)
+    at TypeScriptParserMixin.parseModuleItem (/home/runner/workspace/node_modules/@babel/parser/lib/index.js:12734:17)
+    at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/home/runner/workspace/node_modules/@babel/parser/lib/index.js:13306:36)
+    at TypeScriptParserMixin.parseBlockBody (/home/runner/workspace/node_modules/@babel/parser/lib/index.js:13299:10)
+    at TypeScriptParserMixin.parseProgram (/home/runner/workspace/node_modules/@babel/parser/lib/index.js:12612:10)
+    at TypeScriptParserMixin.parseTopLevel (/home/runner/workspace/node_modules/@babel/parser/lib/index.js:12602:25)
+    at TypeScriptParserMixin.parse (/home/runner/workspace/node_modules/@babel/parser/lib/index.js:14478:25)
+    at TypeScriptParserMixin.parse (/home/runner/workspace/node_modules/@babel/parser/lib/index.js:10116:18)
+    at parse (/home/runner/workspace/node_modules/@babel/parser/lib/index.js:14512:38)
+    at parser (/home/runner/workspace/node_modules/@babel/core/lib/parser/index.js:41:34)
+    at parser.next (<anonymous>)
+    at normalizeFile (/home/runner/workspace/node_modules/@babel/core/lib/transformation/normalize-file.js:64:37)
+    at normalizeFile.next (<anonymous>)
+    at run (/home/runner/workspace/node_modules/@babel/core/lib/transformation/index.js:22:50)
+    at run.next (<anonymous>)
+    at transform (/home/runner/workspace/node_modules/@babel/core/lib/transform.js:22:33)
+    at transform.next (<anonymous>)
+    at step (/home/runner/workspace/node_modules/gensync/index.js:261:32)
+    at /home/runner/workspace/node_modules/gensync/index.js:273:13
+    at async.call.result.err.err (/home/runner/workspace/node_modules/gensync/index.js:223:11)
+    at /home/runner/workspace/node_modules/gensync/index.js:189:28
+    at /home/runner/workspace/node_modules/@babel/core/lib/gensync-utils/async.js:67:7
+    at /home/runner/workspace/node_modules/gensync/index.js:113:33
+    at step (/home/runner/workspace/node_modules/gensync/index.js:287:14)
+    at /home/runner/workspace/node_modules/gensync/index.js:273:13
+    at async.call.result.err.err (/home/runner/workspace/node_modules/gensync/index.js:223:11)
+Click outside, press Esc key, or fix the code to dismiss.
+You can also disable this overlay by setting server.hmr.overlay to false in vite.config.ts.
